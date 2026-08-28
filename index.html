@@ -8,16 +8,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* Background Image with Dark Overlay */
         .hero-section {
-            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
-                        url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1600&q=80');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5)), url('IMG_4900.jpg');
             background-size: cover;
             background-position: center;
             color: #fff;
-            padding: 100px 0;
+            padding: 120px 0;
         }
         .venue-card:hover { transform: translateY(-5px); transition: 0.2s; }
-        .admin-controls { display: none; } 
+        
+        /* Hides admin-only elements from normal users */
+        .admin-only { display: none; } 
     </style>
 </head>
 <body class="bg-light">
@@ -31,9 +33,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#venues">Venues</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#log-event">Log Event</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#logged-events">Records</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#check-availability">Check Availability</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#logged-events">Event Calendar</a></li>
+                    <!-- Log Event link is hidden for normal users -->
+                    <li class="nav-item admin-only"><a class="nav-link text-success fw-bold" href="#log-event">Log New Event</a></li>
                     <li class="nav-item">
                         <a class="nav-link text-warning fw-bold" href="#" id="adminToggleBtn" onclick="toggleAdmin()">Admin Login</a>
                     </li>
@@ -43,21 +46,61 @@
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero-section text-center">
+    <header class="hero-section text-center shadow-lg">
         <div class="container">
-            <h1 class="display-4 fw-bold">Celebrate Your Special Moments</h1>
-            <p class="lead">Open Celebration Lawn • 2 Banquet Halls • Dedicated Dining Space</p>
-            <a href="#log-event" class="btn btn-warning btn-lg mt-3 fw-semibold">Log Your Event</a>
+            <h1 class="display-3 fw-bold text-warning mb-3">Celebrate Your Special Moments</h1>
+            <p class="lead fs-4">Premium Celebration Lawn & Banquet Halls</p>
+            <a href="#check-availability" class="btn btn-outline-light btn-lg mt-4 fw-semibold rounded-pill px-4">Check Empty Slots</a>
         </div>
     </header>
 
-    <!-- Event Logging Form -->
-    <section class="container my-5" id="log-event">
+    <!-- Check Availability Section -->
+    <section class="container my-5" id="check-availability">
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card shadow border-0">
-                    <div class="card-header bg-dark text-white py-3">
-                        <h4 class="mb-0 text-center"><i class="bi bi-journal-plus me-2"></i>Log an Event</h4>
+                    <div class="card-header bg-primary text-white py-3 text-center">
+                        <h4 class="mb-0"><i class="bi bi-search me-2"></i>Check Empty Slots</h4>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <p class="text-muted">Select a date and venue to see if the Morning or Evening slot is available.</p>
+                        <div class="row g-3 justify-content-center">
+                            <div class="col-md-5">
+                                <input type="date" id="checkDate" class="form-control" required>
+                            </div>
+                            <div class="col-md-5">
+                                <select id="checkVenue" class="form-select" required>
+                                    <option value="" disabled selected>Select Venue</option>
+                                    <option value="Celebration Lawn">Celebration Lawn</option>
+                                    <option value="Celebration Hall 1">Celebration Hall 1</option>
+                                    <option value="Celebration Hall 2">Celebration Hall 2</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="checkSlots()">Check</button>
+                            </div>
+                        </div>
+                        <!-- Results Box -->
+                        <div id="availabilityResults" class="mt-4 p-3 rounded bg-light border" style="display: none;">
+                            <h5 class="fw-bold mb-3">Slot Status for <span id="resDate" class="text-primary"></span></h5>
+                            <div class="d-flex justify-content-around">
+                                <div id="resMorning" class="fs-5"><i class="bi bi-brightness-alt-high text-warning"></i> Morning: <span class="badge"></span></div>
+                                <div id="resEvening" class="fs-5"><i class="bi bi-moon-stars text-secondary"></i> Evening: <span class="badge"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN ONLY: Event Logging Form -->
+    <section class="container my-5 admin-only" id="log-event">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow border-0 border-success">
+                    <div class="card-header bg-success text-white py-3">
+                        <h4 class="mb-0 text-center"><i class="bi bi-shield-lock me-2"></i>Admin: Log a Confirmed Event</h4>
                     </div>
                     <div class="card-body p-4">
                         <form id="eventForm">
@@ -71,7 +114,7 @@
                                     <input type="tel" id="contactNumber" class="form-control" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Venue Required</label>
+                                    <label class="form-label fw-semibold">Venue Booked</label>
                                     <select id="venueChoice" class="form-select" required>
                                         <option value="" disabled selected>Select Venue</option>
                                         <option value="Celebration Lawn">Celebration Lawn</option>
@@ -83,8 +126,16 @@
                                     <label class="form-label fw-semibold">Event Date</label>
                                     <input type="date" id="eventDate" class="form-control" required>
                                 </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold">Time Slot</label>
+                                    <select id="timeSlot" class="form-select" required>
+                                        <option value="" disabled selected>Select Morning or Evening</option>
+                                        <option value="Morning">Morning (Day Event)</option>
+                                        <option value="Evening">Evening (Night Event)</option>
+                                    </select>
+                                </div>
                                 <div class="col-12 mt-4">
-                                    <button type="submit" class="btn btn-success w-100 py-2 fs-5 fw-semibold">Submit Event Entry</button>
+                                    <button type="submit" class="btn btn-success w-100 py-2 fs-5 fw-semibold">Lock In Event</button>
                                 </div>
                             </div>
                         </form>
@@ -97,23 +148,18 @@
     <!-- Logged Events Table Section -->
     <section class="container my-5" id="logged-events">
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Logged Events</h5>
-                <button id="clearAllBtn" class="btn btn-sm btn-danger admin-controls" onclick="clearAllEvents()">
-                    <i class="bi bi-trash"></i> Clear All
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Upcoming Events</h5>
+                <button id="clearAllBtn" class="btn btn-sm btn-danger admin-only" onclick="clearAllEvents()">
+                    <i class="bi bi-trash"></i> Clear All Records
                 </button>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Host Name</th>
-                                <th>Contact</th>
-                                <th>Venue</th>
-                                <th>Date</th>
-                                <th class="admin-controls">Admin Action</th>
+                    <table class="table table-striped table-hover mb-0 text-center">
+                        <thead class="table-secondary">
+                            <tr id="tableHeader">
+                                <!-- Headers injected by JavaScript depending on Admin status -->
                             </tr>
                         </thead>
                         <tbody id="eventsTableBody">
@@ -131,6 +177,7 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // Your specific Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAwuUcOhdSBDwYI-8hk9Iq899k8SLAw0SI",
             authDomain: "celebrationvenues.firebaseapp.com",
@@ -148,20 +195,21 @@
 
         const ADMIN_PASSWORD = "admin";
         let isAdminLoggedIn = false;
+        let currentEvents = []; 
 
         window.toggleAdmin = function() {
             if (isAdminLoggedIn) {
                 isAdminLoggedIn = false;
                 document.getElementById("adminToggleBtn").innerHTML = "Admin Login";
                 document.getElementById("adminToggleBtn").classList.replace("text-danger", "text-warning");
-                alert("Logged out of Admin Mode.");
+                alert("Logged out of Admin Mode. Returning to normal user view.");
             } else {
                 const pass = prompt("Enter Admin Password to manage events:");
                 if (pass === ADMIN_PASSWORD) {
                     isAdminLoggedIn = true;
-                    document.getElementById("adminToggleBtn").innerHTML = "<i class='bi bi-unlock'></i> Exit Admin";
+                    document.getElementById("adminToggleBtn").innerHTML = "<i class='bi bi-shield-lock'></i> Exit Admin";
                     document.getElementById("adminToggleBtn").classList.replace("text-warning", "text-danger");
-                    alert("Admin Access Granted.");
+                    alert("Welcome Admin! You can now log and delete events.");
                 } else if (pass !== null) {
                     alert("Incorrect Password!");
                 }
@@ -171,16 +219,19 @@
         };
 
         function toggleAdminUI() {
-            const adminElements = document.querySelectorAll('.admin-controls');
+            const adminElements = document.querySelectorAll('.admin-only');
             adminElements.forEach(el => {
-                el.style.display = isAdminLoggedIn ? 'table-cell' : 'none';
+                if(el.tagName === 'BUTTON') {
+                    el.style.display = isAdminLoggedIn ? 'block' : 'none';
+                } else if(el.tagName === 'LI') {
+                    el.style.display = isAdminLoggedIn ? 'list-item' : 'none';
+                } else {
+                    el.style.display = isAdminLoggedIn ? 'block' : 'none';
+                }
             });
-            document.getElementById('clearAllBtn').style.display = isAdminLoggedIn ? 'block' : 'none';
         }
 
         const form = document.getElementById("eventForm");
-        
-        // Safety check added here just in case!
         if (form) {
             form.addEventListener("submit", async function(e) {
                 e.preventDefault();
@@ -190,11 +241,14 @@
                         contactNumber: document.getElementById("contactNumber").value,
                         venueChoice: document.getElementById("venueChoice").value,
                         eventDate: document.getElementById("eventDate").value,
+                        timeSlot: document.getElementById("timeSlot").value,
                         timestamp: Date.now()
                     });
                     
                     form.reset();
-                    alert("Event successfully logged!");
+                    alert("Event successfully locked in!");
+                    document.getElementById("checkDate").value = ""; 
+                    document.getElementById("availabilityResults").style.display = "none";
                 } catch (error) {
                     console.error("Error adding document: ", error);
                     alert("Error logging event. Check console.");
@@ -202,62 +256,107 @@
             });
         }
 
-        let currentEvents = []; 
-        
         onSnapshot(eventsCollection, (snapshot) => {
             currentEvents = [];
             snapshot.forEach((doc) => {
                 currentEvents.push({ id: doc.id, ...doc.data() });
             });
             
-            currentEvents.sort((a, b) => a.timestamp - b.timestamp);
+            currentEvents.sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate));
             renderTable();
         });
 
         function renderTable() {
+            const thead = document.getElementById("tableHeader");
             const tbody = document.getElementById("eventsTableBody");
-            if (!tbody) return; // Safety check
+            if (!tbody || !thead) return; 
             
+            if (isAdminLoggedIn) {
+                thead.innerHTML = `<th>Date</th> <th>Slot</th> <th>Venue</th> <th>Host Name</th> <th>Contact</th> <th>Action</th>`;
+            } else {
+                thead.innerHTML = `<th>Date</th> <th>Time Slot</th> <th>Booked Venue</th> <th>Status</th>`;
+            }
+
             tbody.innerHTML = "";
 
             if (currentEvents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">No events logged yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No events booked yet.</td></tr>`;
                 return;
             }
 
-            currentEvents.forEach((evt, idx) => {
+            currentEvents.forEach((evt) => {
                 const tr = document.createElement("tr");
-                let rowHTML = `
-                    <td>${idx + 1}</td>
-                    <td><strong>${escapeHtml(evt.hostName)}</strong></td>
-                    <td>${escapeHtml(evt.contactNumber)}</td>
-                    <td><span class="badge bg-primary">${escapeHtml(evt.venueChoice)}</span></td>
-                    <td>${escapeHtml(evt.eventDate)}</td>
-                `;
+                const badgeColor = evt.timeSlot === "Morning" ? "bg-warning text-dark" : "bg-dark text-white";
                 
                 if (isAdminLoggedIn) {
-                    rowHTML += `<td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteSingleEvent('${evt.id}')">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                    </td>`;
+                    tr.innerHTML = `
+                        <td class="fw-bold">${escapeHtml(evt.eventDate)}</td>
+                        <td><span class="badge ${badgeColor}">${escapeHtml(evt.timeSlot)}</span></td>
+                        <td>${escapeHtml(evt.venueChoice)}</td>
+                        <td>${escapeHtml(evt.hostName)}</td>
+                        <td>${escapeHtml(evt.contactNumber)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSingleEvent('${evt.id}')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="fw-bold">${escapeHtml(evt.eventDate)}</td>
+                        <td><span class="badge ${badgeColor}">${escapeHtml(evt.timeSlot)}</span></td>
+                        <td>${escapeHtml(evt.venueChoice)}</td>
+                        <td><span class="badge bg-danger">Booked</span></td>
+                    `;
                 }
-
-                tr.innerHTML = rowHTML;
                 tbody.appendChild(tr);
             });
         }
 
+        window.checkSlots = function() {
+            const date = document.getElementById("checkDate").value;
+            const venue = document.getElementById("checkVenue").value;
+            const resultsBox = document.getElementById("availabilityResults");
+
+            if (!date || !venue) {
+                alert("Please select both a date and a venue to check availability.");
+                return;
+            }
+
+            const eventsOnDay = currentEvents.filter(e => e.eventDate === date && e.venueChoice === venue);
+            
+            const isMorningBooked = eventsOnDay.some(e => e.timeSlot === "Morning");
+            const isEveningBooked = eventsOnDay.some(e => e.timeSlot === "Evening");
+
+            document.getElementById("resDate").innerText = date;
+            
+            const mornBadge = document.querySelector("#resMorning .badge");
+            if (isMorningBooked) {
+                mornBadge.className = "badge bg-danger"; mornBadge.innerText = "Booked";
+            } else {
+                mornBadge.className = "badge bg-success"; mornBadge.innerText = "Available";
+            }
+
+            const eveBadge = document.querySelector("#resEvening .badge");
+            if (isEveningBooked) {
+                eveBadge.className = "badge bg-danger"; eveBadge.innerText = "Booked";
+            } else {
+                eveBadge.className = "badge bg-success"; eveBadge.innerText = "Available";
+            }
+
+            resultsBox.style.display = "block";
+        }
+
         window.deleteSingleEvent = async function(docId) {
             if (!isAdminLoggedIn) return;
-            if (confirm("Are you sure you want to delete this specific event?")) {
+            if (confirm("Are you sure you want to delete this event?")) {
                 await deleteDoc(doc(db, "events", docId));
             }
         };
 
         window.clearAllEvents = async function() {
             if (!isAdminLoggedIn) return;
-            if (confirm("WARNING: Are you sure you want to clear ALL logged event records?")) {
+            if (confirm("WARNING: Are you sure you want to clear ALL events?")) {
                 currentEvents.forEach(async (evt) => {
                     await deleteDoc(doc(db, "events", evt.id));
                 });
